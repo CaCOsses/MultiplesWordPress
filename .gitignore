@@ -1,0 +1,4 @@
+html/
+db_data/
+certbot/
+.env
