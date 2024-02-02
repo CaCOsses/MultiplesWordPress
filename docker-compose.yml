@@ -1,0 +1,126 @@
+version: "2.2"
+services:
+
+    myrootdevwordpress:
+        container_name: myrootdevwordpress
+        image: wordpress:php7.4-apache
+        restart: always
+        stdin_open: true
+        tty: true
+        env_file: .env
+        environment:
+            WORDPRESS_DB_HOST: db:3306
+            WORDPRESS_DB_USER: $WORDPRESS_DB_USER_1
+            WORDPRESS_DB_PASSWORD: $WORDPRESS_DB_PASSWORD_1
+            WORDPRESS_DB_NAME: $WORDPRESS_DB_NAME_1
+        volumes:
+            - ./html/myrootdev:/var/www/html
+
+    gyqrebeldewordpress:
+        container_name: gyqrebeldewordpress
+        image: wordpress:php7.4-apache
+        restart: always
+        stdin_open: true
+        tty: true
+        env_file: .env
+        environment:
+            WORDPRESS_DB_HOST: db:3306
+            WORDPRESS_DB_USER: $WORDPRESS_DB_USER_2
+            WORDPRESS_DB_PASSWORD: $WORDPRESS_DB_PASSWORD_2
+            WORDPRESS_DB_NAME: $WORDPRESS_DB_NAME_2
+        volumes:
+            - ./html/gyqrebelde:/var/www/html
+
+    cristinaweilwordpress:
+        container_name: cristinaweilwordpress
+        image: wordpress:php7.4-apache
+        restart: always
+        stdin_open: true
+        tty: true
+        env_file: .env
+        environment:
+            WORDPRESS_DB_HOST: db:3306
+            WORDPRESS_DB_USER: $WORDPRESS_DB_USER_3
+            WORDPRESS_DB_PASSWORD: $WORDPRESS_DB_PASSWORD_3
+            WORDPRESS_DB_NAME: $WORDPRESS_DB_NAME_3
+        volumes:
+            - ./html/cristinaweil:/var/www/html
+            
+    cristinarenderwordpress:
+        container_name: cristinarenderwordpress
+        image: wordpress:php7.4-apache
+        restart: always
+        stdin_open: true
+        tty: true
+        ports:
+            - '8888:80'
+        env_file: .env
+        environment:
+            WORDPRESS_DB_HOST: db:3306
+            WORDPRESS_DB_USER: $WORDPRESS_DB_USER_4
+            WORDPRESS_DB_PASSWORD: $WORDPRESS_DB_PASSWORD_4
+            WORDPRESS_DB_NAME: $WORDPRESS_DB_NAME_4
+        volumes:
+            - ./html/cristinarender:/var/www/html
+
+    nginx:
+        container_name: nginx
+        image: nginx:latest
+        restart: unless-stopped
+        ports:
+            - 80:80
+            - 443:443
+        volumes:
+            - ./nginx/conf:/etc/nginx/conf.d
+            - ./html:/var/www/html
+            - ./certbot/conf:/etc/nginx/ssl
+
+    myrootdevcertbot:
+        container_name: myrootdevcertbot
+        image: certbot/certbot:latest
+        command: certonly --webroot --webroot-path=/var/www/html --email camilo.cubillos.osses.90@gmail.com --agree-tos --no-eff-email -d myrootdev.com -d www.myrootdev.com
+        volumes:
+            - ./certbot/conf:/etc/letsencrypt
+            - ./certbot/logs:/var/log/letsencrypt
+            - ./html/myrootdev:/var/www/html
+    
+    gyqrebeldecertbot:
+        container_name: gyqrebeldecertbot
+        image: certbot/certbot:latest
+        command: certonly --webroot --webroot-path=/var/www/html --email camilo.cubillos.osses.90@gmail.com --agree-tos --no-eff-email -d guayaquilrebelde.org -d www.guayaquilrebelde.org
+        volumes:
+            - ./certbot/conf:/etc/letsencrypt
+            - ./certbot/logs:/var/log/letsencrypt
+            - ./html/gyqrebelde:/var/www/html
+
+    cristinaweilcertbot:
+        container_name: cristinaweilcertbot
+        image: certbot/certbot:latest
+        command: certonly --webroot --webroot-path=/var/www/html --email camilo.cubillos.osses.90@gmail.com --agree-tos --no-eff-email -d cristinaweil.com -d www.cristinaweil.com
+        volumes:
+            - ./certbot/conf:/etc/letsencrypt
+            - ./certbot/logs:/var/log/letsencrypt
+            - ./html/cristinaweil:/var/www/html
+
+    db:
+        image: mysql:8.0
+        container_name: mysql8
+        restart: always
+        ports:
+            - '3306:3306'
+        env_file: .env
+        environment:
+            MYSQL_ROOT_PASSWORD: $MYSQL_ROOT_PASSWORD
+        volumes:
+            - ./db_data:/var/lib/mysql
+
+    phpmyadmin:
+        depends_on:
+            - db
+        image: phpmyadmin/phpmyadmin
+        container_name: phpmyadmin
+        restart: always
+        ports:
+            - '7070:80'
+        environment:
+            PMA_HOST: db
